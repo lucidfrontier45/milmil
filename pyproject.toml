@@ -1,20 +1,25 @@
 [project]
-name = "python-uv-template"
+name = "milmil"
 version = "0.1.0"
-description = "A Project Template of Python with uv"
+description = ""
 authors = [{ name = "杜世橋 Du Shiqiao", email = "lucidfrontier.45@gmail.com" }]
 requires-python = ">=3.13"
-dependencies = ["fastapi>=0.116.1", "uvicorn[standard]>=0.35.0"]
+dependencies = [
+    "autograd>=1.8.0",
+    "lightgbm>=4.6.0",
+    "numpy>=2.4.4",
+    "scikit-learn>=1.8.0",
+]
 
 [project.scripts]
 app = "app.cli:main"
 
 [dependency-groups]
 dev = [
-    "poethepoet>=0.39.0",
-    "pyrefly>=0.46.1",
-    "pytest-cov>=7.0.0",
-    "ruff>=0.14.10",
+    "poethepoet>=0.45.0",
+    "pyrefly>=0.64.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.12",
 ]
 
 [build-system]
