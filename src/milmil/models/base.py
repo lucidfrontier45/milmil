@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
 import numpy as np
+from sklearn.base import BaseEstimator, ClassifierMixin
 
 from ..types import Bag, LabeledBag, bags_to_arrays, labeled_bags_to_arrays
 
@@ -16,8 +17,16 @@ class BaseMILModel(ABC):
         self.fit(x, y, z, *args, **kwargs)
 
     @abstractmethod
-    def predict(self, x: np.ndarray, z: np.ndarray) -> np.ndarray:
+    def predict_proba(self, x: np.ndarray, z: np.ndarray) -> np.ndarray:
         pass
+
+    def predict_proba_bags(self, bags: Sequence[Bag]) -> np.ndarray:
+        x, z = bags_to_arrays(bags)
+        return self.predict_proba(x, z)
+
+    def predict(self, x: np.ndarray, z: np.ndarray) -> np.ndarray:
+        proba = self.predict_proba(x, z)
+        return (proba >= 0.5).astype(int)
 
     def predict_bags(self, bags: Sequence[Bag]) -> np.ndarray:
         x, z = bags_to_arrays(bags)
