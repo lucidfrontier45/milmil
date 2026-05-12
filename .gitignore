@@ -134,3 +134,4 @@ dmypy.json
 
 # for library project, include lockfile
 # uv.lock
+.tree-sitter-cache
