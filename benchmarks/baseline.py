@@ -4,7 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import average_precision_score
 
 from milmil.datasets import make_mil_data
-from milmil.models import InstanceExpansionMIL
+from milmil.models import AlternatingOptimizationMIL, InstanceExpansionMIL
 from milmil.types import LabeledBag, labeled_bags_to_arrays
 
 
@@ -50,7 +50,21 @@ def evaluate_instance_expansion_mil(
     return average_precision_score(y_test, y_proba)
 
 
-def evaluate_single_seed(seed: int) -> tuple[int, float, float]:
+def evaluate_alternating_optimization_mil(
+    train_bags: list[LabeledBag], test_bags: list[LabeledBag], seed: int
+) -> float:
+    x_train, y_train, z_train = labeled_bags_to_arrays(train_bags)
+    x_test, y_test, z_test = labeled_bags_to_arrays(test_bags)
+
+    rf = RandomForestClassifier(random_state=seed, n_estimators=100)
+    model = AlternatingOptimizationMIL(estimator=rf)
+    model.fit(x_train, y_train, z_train)
+    y_proba = model.predict_proba(x_test, z_test)
+
+    return average_precision_score(y_test, y_proba)
+
+
+def evaluate_single_seed(seed: int) -> tuple[int, float, float, float]:
     bags = make_mil_data(
         n_bags=1000,
         n_features=50,
@@ -65,39 +79,46 @@ def evaluate_single_seed(seed: int) -> tuple[int, float, float]:
     train_bags, test_bags = split_bags(bags, test_ratio=0.2, seed=seed)
 
     baseline_ap = evaluate_baseline(train_bags, test_bags, seed)
-    mil_ap = evaluate_instance_expansion_mil(train_bags, test_bags, seed)
+    exp_ap = evaluate_instance_expansion_mil(train_bags, test_bags, seed)
+    alt_ap = evaluate_alternating_optimization_mil(train_bags, test_bags, seed)
 
-    return seed, baseline_ap, mil_ap
+    return seed, baseline_ap, exp_ap, alt_ap
 
 
 def run_benchmark():
     seeds = [42, 123, 456, 789, 1024, 412, 588, 999, 2024, 3000]
 
-    print("Benchmark: Baseline (Concat+RF) vs InstanceExpansionMIL+RF")
-    print("Data: n_bags=100, n_features=10, n_instances=(3, 3)")
+    print("Benchmark: Baseline vs InstanceExpansionMIL vs AlternatingOptimizationMIL")
+    print("Data: n_bags=1000, n_features=50, n_instances=(3, 3)")
     print("Split: 80/20 train/test")
     print("Metric: Average Precision")
-    print("=" * 60)
+    print("=" * 70)
 
     results = Parallel(n_jobs=-1)(delayed(evaluate_single_seed)(seed) for seed in seeds)
 
     baseline_scores = []
-    mil_scores = []
-    for seed, baseline_ap, mil_ap in sorted(results, key=lambda x: x[0]):
+    exp_scores = []
+    alt_scores = []
+    for seed, baseline_ap, exp_ap, alt_ap in sorted(results, key=lambda x: x[0]):
         baseline_scores.append(baseline_ap)
-        mil_scores.append(mil_ap)
+        exp_scores.append(exp_ap)
+        alt_scores.append(alt_ap)
         print(f"\nSeed {seed}:")
-        print(f"  Baseline (Concat+RF):     AP = {baseline_ap:.4f}")
-        print(f"  InstanceExpansionMIL+RF:  AP = {mil_ap:.4f}")
+        print(f"  Baseline (Concat+RF):           AP = {baseline_ap:.4f}")
+        print(f"  InstanceExpansionMIL+RF:        AP = {exp_ap:.4f}")
+        print(f"  AlternatingOptimizationMIL+RF:  AP = {alt_ap:.4f}")
 
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 70)
     print("Summary (mean ± std):")
-    baseline_mean = np.mean(baseline_scores)
-    baseline_std = np.std(baseline_scores)
-    mil_mean = np.mean(mil_scores)
-    mil_std = np.std(mil_scores)
-    print(f"  Baseline:                 AP = {baseline_mean:.4f} ± {baseline_std:.4f}")
-    print(f"  InstanceExpansionMIL+RF:  AP = {mil_mean:.4f} ± {mil_std:.4f}")
+    bm = np.mean(baseline_scores)
+    bs = np.std(baseline_scores)
+    em = np.mean(exp_scores)
+    es = np.std(exp_scores)
+    am = np.mean(alt_scores)
+    as_ = np.std(alt_scores)
+    print(f"  Baseline:                       AP = {bm:.4f} ± {bs:.4f}")
+    print(f"  InstanceExpansionMIL+RF:        AP = {em:.4f} ± {es:.4f}")
+    print(f"  AlternatingOptimizationMIL+RF:  AP = {am:.4f} ± {as_:.4f}")
 
 
 if __name__ == "__main__":
