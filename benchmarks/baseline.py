@@ -53,13 +53,14 @@ def evaluate_instance_expansion_mil(
 def evaluate_single_seed(seed: int) -> tuple[int, float, float]:
     bags = make_mil_data(
         n_bags=1000,
-        n_features=100,
+        n_features=50,
         n_instances=(3, 3),
         random_state=seed,
-        informative_ratio=0.2,
+        informative_ratio=0.1,
         redundant_ratio=0.3,
         n_clusters_per_class=5,
         class_sep=0.1,
+        noise=0.2,
     )
     train_bags, test_bags = split_bags(bags, test_ratio=0.2, seed=seed)
 
