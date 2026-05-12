@@ -1,16 +1,17 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from typing import Any, Self
 
 import numpy as np
-from sklearn.base import BaseEstimator, ClassifierMixin
 
 from ..types import Bag, LabeledBag, bags_to_arrays, labeled_bags_to_arrays
 
 
 class BaseMILModel(ABC):
     @abstractmethod
-    def fit(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, *args, **kwargs):
-        pass
+    def fit(
+        self, x: np.ndarray, y: np.ndarray, z: np.ndarray, *args: Any, **kwargs: Any
+    ) -> Self: ...
 
     def fit_bags(self, bags: Sequence[LabeledBag], *args, **kwargs):
         x, y, z = labeled_bags_to_arrays(bags)

@@ -1,7 +1,14 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any, Protocol, Self
 
 import numpy as np
+
+
+class ProbabilisticEstimator(Protocol):
+    def fit(self, X: np.ndarray, y: np.ndarray, *args: Any, **kwargs: Any) -> Self: ...  # noqa: N803
+    def predict_proba(self, X: np.ndarray) -> np.ndarray: ...  # noqa: N803
+    def predict(self, X: np.ndarray) -> np.ndarray: ...  # noqa: N803
 
 
 @dataclass(slots=True)
