@@ -29,9 +29,6 @@ build-backend = "uv_build"
 [tool.uv]
 managed = true
 
-[tool.uv.build-backend]
-module-name = ["app"]
-
 [tool.poe.tasks]
 ruff_check = "ruff check ."
 ruff_fix = "ruff check --fix ."
