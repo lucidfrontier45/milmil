@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -18,7 +19,7 @@ def arrays_to_bags(x: np.ndarray, z: np.ndarray) -> list[Bag]:
     return [Bag(features=x[z == i]) for i in unique_z]
 
 
-def bags_to_arrays(bags: list[Bag]) -> tuple[np.ndarray, np.ndarray]:
+def bags_to_arrays(bags: Sequence[Bag]) -> tuple[np.ndarray, np.ndarray]:
     if not bags:
         return np.empty((0, 0)), np.empty(0, dtype=np.intp)
     features = np.vstack([b.features for b in bags])
@@ -35,7 +36,7 @@ def arrays_to_labeled_bags(
 
 
 def labeled_bags_to_arrays(
-    bags: list[LabeledBag],
+    bags: Sequence[LabeledBag],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     if not bags:
         return np.empty((0, 0)), np.empty(0, dtype=np.intp), np.empty(0, dtype=np.intp)
