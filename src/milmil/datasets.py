@@ -14,6 +14,7 @@ def make_mil_data(
     informative_ratio: float = 1.0,
     redundant_ratio: float = 0.0,
     n_clusters_per_class: int = 1,
+    class_sep: float = 1.0,
     random_state: int | None = None,
 ) -> list[LabeledBag]:
     rng = np.random.default_rng(random_state)
@@ -28,6 +29,7 @@ def make_mil_data(
         n_redundant=int(n_features * redundant_ratio),
         n_repeated=0,
         n_clusters_per_class=n_clusters_per_class,
+        class_sep=class_sep,
         weights=[0.5, 0.5],
         random_state=random_state,
     )
